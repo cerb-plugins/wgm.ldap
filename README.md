@@ -1,11 +1,11 @@
 Cerb5 Plugins - wgm.ldap
 ===========================================
-Copyright (C) 2011 WebGroup Media, LLC.  
+Copyright (C) 2012 WebGroup Media, LLC.  
 [http://www.cerberusweb.com/](http://www.cerberusweb.com/)  
 
 Experimental
 ------------
-This plugin is currently being developed and is offered on an experimental basis.  _It is currently only compatible with Cerberus Helpdesk 5.4+_.
+This plugin is currently being developed and is offered on an experimental basis.  _It is currently only compatible with Cerberus Helpdesk 5.4 or later_.
 
 What's this?
 ------------
