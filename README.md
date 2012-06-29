@@ -1,4 +1,4 @@
-Cerb5 Plugins - wgm.ldap
+Cerb Plugins - wgm.ldap
 ===========================================
 Copyright (C) 2012 WebGroup Media, LLC.  
 [http://www.cerberusweb.com/](http://www.cerberusweb.com/)  
@@ -10,7 +10,7 @@ This plugin provides integration with [LDAP](http://en.wikipedia.org/wiki/Lightw
 Installation
 ------------
 * Change directory to **/cerb6/storage/plugins/**
-* `git clone git://github.com/cerb6-plugins/wgm.ldap.git`
+* `git clone git://github.com/cerb-plugins/wgm.ldap.git`
 * In your helpdesk, enable the plugin from **Setup->Plugins**.
 * Click **Setup->Plugins->LDAP** and configure your LDAP credentials.
 

@@ -4,21 +4,21 @@
 	<name>LDAP Integration</name>
 	<description>Authenticate worker and customer logins via LDAP.</description>
 	<author>WebGroup Media, LLC.</author>
-	<version>1.0.3</version>
-	<link>http://www.cerb5.com/</link>
+	<version>1.0.4</version>
+	<link>http://www.cerbweb.com/book/latest/plugins/wgm.ldap.html</link>
 	<image>plugin.png</image>
  
  	<!-- Requirements -->
 
 	<requires>
-		<app_version min="6.0" max="6.0.99" />
+		<app_version min="6.1" max="6.1.99" />
 		<php_extension name="ldap" />
 	</requires>
  
 	<!-- Plugin Dependencies -->
 	
 	<dependencies>
-		<require plugin_id="cerberusweb.core" version="6.0.0-dev" />
+		<require plugin_id="cerberusweb.core" version="6.1.0" />
 	</dependencies>
 
 	<!-- Templates -->
