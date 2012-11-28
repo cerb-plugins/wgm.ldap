@@ -35,14 +35,13 @@
 
 		<extension point="cerberusweb.login">
 			<id>login.ldap</id>
-			<name>LDAP Login</name>
+			<name>LDAP</name>
 			<class>
 				<file>api/App.php</file>
 				<name>ChLdapLoginModule</name>
 			</class>
 			<params>
-				<param key="switcher_icon" value="images/fugue/address-book.png" />
-				<param key="switcher_label" value="Log in with LDAP" />
+				<param key="uri" value="ldap" />
 			</params>
 		</extension>
 		
