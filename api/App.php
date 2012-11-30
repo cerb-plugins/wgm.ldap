@@ -78,13 +78,8 @@ class ChLdapLoginModule extends Extension_LoginAuthenticator {
 		$dn = $entries[0]['dn'];
 		
 		if(@ldap_bind($ldap, $dn, $password)) {
-			$session = DevblocksPlatform::getSessionService();
-			$visit = new CerberusVisit();
-			$visit->setWorker($worker);
-			$session->setVisit($visit);
-			
 			@ldap_unbind($ldap);
-			return true;
+			return $worker;
 		}
 		
 		@ldap_unbind($ldap);
