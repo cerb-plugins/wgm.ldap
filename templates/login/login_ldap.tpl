@@ -17,6 +17,8 @@
 			{if !empty($email)}
 				<b>{$email}</b>
 				<input type="hidden" name="email" value="{$email}">
+				 &nbsp; 
+				<a href="{devblocks_url}c=login&a=reset{/devblocks_url}" tabindex="-1">use a different email</a>
 			{else}
 				<input type="text" name="email" size="45" class="input_email">
 			{/if}
