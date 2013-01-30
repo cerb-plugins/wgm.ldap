@@ -4,14 +4,14 @@
 	<name>LDAP Integration</name>
 	<description>Authenticate worker and customer logins via LDAP.</description>
 	<author>WebGroup Media, LLC.</author>
-	<version>1.0.6</version>
+	<version>1.0.7</version>
 	<link>http://www.cerbweb.com/book/latest/plugins/wgm.ldap.html</link>
 	<image>plugin.png</image>
  
  	<!-- Requirements -->
 
 	<requires>
-		<app_version min="6.2" max="6.2.99" />
+		<app_version min="6.3" max="6.3.99" />
 		<php_extension name="ldap" />
 	</requires>
  
