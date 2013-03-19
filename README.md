@@ -1,6 +1,6 @@
 Cerb Plugins - wgm.ldap
 ===========================================
-Copyright (C) 2012 WebGroup Media, LLC.  
+Copyright (C) 2012 Webgroup Media, LLC.  
 [http://www.cerberusweb.com/](http://www.cerberusweb.com/)  
 
 What's this?

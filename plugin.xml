@@ -3,7 +3,7 @@
 	<id>wgm.ldap</id>
 	<name>LDAP Integration</name>
 	<description>Authenticate worker and customer logins via LDAP.</description>
-	<author>WebGroup Media, LLC.</author>
+	<author>Webgroup Media, LLC.</author>
 	<version>1.0.7</version>
 	<link>http://www.cerbweb.com/book/latest/plugins/wgm.ldap.html</link>
 	<image>plugin.png</image>
