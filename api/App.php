@@ -103,7 +103,7 @@ class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 				$tpl->display("devblocks:wgm.ldap:portal_".ChPortalHelper::getCode().":support_center/login/ldap.tpl");
 				break;
 		}
-	}	
+	}
 	
 	function authenticateAction() {
 		$umsession = ChPortalHelper::getSession();
@@ -135,7 +135,7 @@ class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 			if(empty($valid_email) || !is_array($valid_email) || empty($valid_email[0]->host) || $valid_email[0]->host=='host')
 				throw new Exception("Please provide a valid email address.");
 			
-			$email = $valid_email[0]->mailbox . '@' . $valid_email[0]->host; 
+			$email = $valid_email[0]->mailbox . '@' . $valid_email[0]->host;
 
 			// LDAP
 			$ldap_settings = array(
