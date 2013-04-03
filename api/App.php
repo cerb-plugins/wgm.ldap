@@ -27,6 +27,9 @@ class ChLdapLoginModule extends Extension_LoginAuthenticator {
 		if(!extension_loaded('ldap'))
 			return false;
 		
+		if(empty($email) || empty($password))
+			return false;
+		
 		// Look up worker by email
 		if(null == ($address = DAO_AddressToWorker::getByAddress($email)))
 			return false;
