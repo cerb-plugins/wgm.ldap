@@ -196,7 +196,11 @@ class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 				if(!empty($address->contact_person_id)) {
 					if(null != ($contact = DAO_ContactPerson::get($address->contact_person_id))) {
 						$umsession->login($contact);
-						header("Location: " . $url_writer->write('', true));
+						
+						$original_path = $umsession->getProperty('login.original_path', '');
+						$path = !empty($original_path) ? explode('/', $original_path) : array();
+						
+						DevblocksPlatform::redirect(new DevblocksHttpResponse($path));
 						exit;
 					}
 					
@@ -215,7 +219,11 @@ class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 						$umsession->login($contact);
 						
 						@ldap_unbind($ldap);
-						header("Location: " . $url_writer->write('account', true));
+						
+						$original_path = $umsession->getProperty('login.original_path', 'account');
+						$path = !empty($original_path) ? explode('/', $original_path) : array();
+						
+						DevblocksPlatform::redirect(new DevblocksHttpResponse($path));
 						exit;
 					}
 				}

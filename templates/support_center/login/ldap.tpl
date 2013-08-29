@@ -1,5 +1,4 @@
 <form action="{devblocks_url}c=login&a=authenticate{/devblocks_url}" method="post" id="loginLDAP">
-<input type="hidden" name="original_path" value="{$original_path}">
 
 {if !empty($error)}
 <div class="error">{$error}</div>
