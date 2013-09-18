@@ -14,7 +14,7 @@
 	<input type="password" name="password" size="45" autocomplete="off"><br>
 	
 	<br>
-	<button type="submit">{$translate->_('header.signon')|capitalize}</button>
+	<button type="submit">{'header.signon'|devblocks_translate|capitalize}</button>
 </fieldset>
 </form>
 
