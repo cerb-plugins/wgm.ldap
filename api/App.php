@@ -190,6 +190,9 @@ class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 					
 					if(null == ($address = DAO_Address::get($address_id)))
 						throw new Exception("Your account could not be created. Please try again later.");
+					
+					if($address->is_banned)
+						throw new Exception("The provided email address is not available.");
 				}
 				
 				// See if the contact person exists or not
