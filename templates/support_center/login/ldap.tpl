@@ -1,4 +1,5 @@
 <form action="{devblocks_url}c=login&a=authenticate{/devblocks_url}" method="post" id="loginLDAP">
+<input type="hidden" name="_csrf_token" value="{$session->csrf_token}">
 
 {if !empty($error)}
 <div class="error">{$error}</div>
