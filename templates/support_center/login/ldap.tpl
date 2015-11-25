@@ -19,9 +19,6 @@
 </fieldset>
 </form>
 
-{*<a href="{devblocks_url}c=login&a=register{/devblocks_url}">Don't have an account? Create one for free with your OpenID.</a><br>*}
-{*<a href="{devblocks_url}c=login&a=forgot{/devblocks_url}">Lost your OpenID? Click here to recover your account.</a><br>*}
-
 {include file="devblocks:cerberusweb.support_center::support_center/login/switcher.tpl"}
 
 <script type="text/javascript">

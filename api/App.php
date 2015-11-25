@@ -31,10 +31,10 @@ class ChLdapLoginModule extends Extension_LoginAuthenticator {
 			return false;
 		
 		// Look up worker by email
-		if(null == ($address = DAO_AddressToWorker::getByAddress($email)))
+		if(null == ($address = DAO_AddressToWorker::getByEmail($email)))
 			return false;
 		
-		if(null == ($worker = DAO_Worker::get($address->worker_id)))
+		if(null == ($worker = $address->getWorker()))
 			return false;
 
 		if($worker->auth_extension_id != $this->manifest->id)
@@ -68,7 +68,7 @@ class ChLdapLoginModule extends Extension_LoginAuthenticator {
 		if(!$login)
 			return false;
 	
-		$query = sprintf("(%s=%s)", $ldap_settings['field_email'], $address->address);
+		$query = sprintf("(%s=%s)", $ldap_settings['field_email'], $address->getEmailAsString());
 		@$results = ldap_search($ldap, $ldap_settings['context_search'], $query);
 		@$entries = ldap_get_entries($ldap, $results);
 		@$count = intval($entries['count']);
@@ -111,7 +111,6 @@ class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 	function authenticateAction() {
 		$umsession = ChPortalHelper::getSession();
 		$url_writer = DevblocksPlatform::getUrlService();
-		$openid = DevblocksPlatform::getOpenIDService();
 		$tpl = DevblocksPlatform::getTemplateService();
 
 		// Clear the past session
@@ -184,8 +183,6 @@ class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 				if(null == ($address = DAO_Address::lookupAddress($email))) {
 					$address_id = DAO_Address::create(array(
 						DAO_Address::EMAIL => $email,
-						DAO_Address::FIRST_NAME => @$entries[0][strtolower($ldap_settings['field_firstname'])][0],
-						DAO_Address::LAST_NAME => @$entries[0][strtolower($ldap_settings['field_lastname'])][0],
 					));
 					
 					if(null == ($address = DAO_Address::get($address_id)))
@@ -196,8 +193,8 @@ class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 				}
 				
 				// See if the contact person exists or not
-				if(!empty($address->contact_person_id)) {
-					if(null != ($contact = DAO_ContactPerson::get($address->contact_person_id))) {
+				if(!empty($address->contact_id)) {
+					if(null != ($contact = DAO_Contact::get($address->contact_id))) {
 						$umsession->login($contact);
 						
 						$original_path = $umsession->getProperty('login.original_path', '');
@@ -209,14 +206,16 @@ class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 					
 				} else { // create
 					$fields = array(
-						DAO_ContactPerson::CREATED => time(),
-						DAO_ContactPerson::EMAIL_ID => $address->id,
+						DAO_Contact::CREATED_AT => time(),
+						DAO_Contact::PRIMARY_EMAIL_ID => $address->id,
+						DAO_Contact::FIRST_NAME => @$entries[0][strtolower($ldap_settings['field_firstname'])][0],
+						DAO_Contact::LAST_NAME => @$entries[0][strtolower($ldap_settings['field_lastname'])][0],
 					);
-					$contact_id = DAO_ContactPerson::create($fields);
+					$contact_id = DAO_Contact::create($fields);
 					
-					if(null != ($contact = DAO_ContactPerson::get($contact_id))) {
+					if(null != ($contact = DAO_Contact::get($contact_id))) {
 						DAO_Address::update($address->id, array(
-							DAO_Address::CONTACT_PERSON_ID => $contact->id,
+							DAO_Address::CONTACT_ID => $contact->id,
 						));
 						
 						$umsession->login($contact);
