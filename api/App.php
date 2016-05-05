@@ -95,7 +95,7 @@ endif;
 if(class_exists('Extension_ScLoginAuthenticator',true)):
 class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 	function writeResponse(DevblocksHttpResponse $response) {
-		$tpl = DevblocksPlatform::getTemplateService();
+		$tpl = DevblocksPlatform::getTemplateSandboxService();
 		$umsession = ChPortalHelper::getSession();
 		
 		$stack = $response->path;
