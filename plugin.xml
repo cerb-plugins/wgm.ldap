@@ -4,7 +4,7 @@
 	<name>LDAP Integration</name>
 	<description>Authenticate worker and customer logins via LDAP.</description>
 	<author>Webgroup Media, LLC.</author>
-	<version>1.0.24</version>
+	<version>1.0.25</version>
 	<link>http://www.cerbweb.com/book/latest/plugins/wgm.ldap.html</link>
 	<image>plugin.png</image>
  
@@ -71,7 +71,7 @@
 			</class>
 			<params>
 				<param key="page_id" value="core.page.configuration" />
-				<param key="menu_id" value="core.setup.menu.plugins" />
+				<param key="menu_id" value="core.setup.menu.settings" />
 			</params>
 		</extension>
 		
