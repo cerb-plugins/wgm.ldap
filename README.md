@@ -1,7 +1,7 @@
 Cerb Plugins - wgm.ldap
 ===========================================
-Copyright (C) 2012 Webgroup Media, LLC.  
-[http://www.cerberusweb.com/](http://www.cerberusweb.com/)  
+Copyright (C) 2017, Webgroup Media, LLC.  
+[http://cerb.io/](http://cerb.io/)  
 
 What's this?
 ------------
@@ -16,7 +16,7 @@ Installation
 
 Credits
 -------
-This plugin was developed by [WebGroup Media, LLC](http://www.cerberusweb.com/).
+This plugin was developed by [Webgroup Media, LLC](http://www.cerberusweb.com/).
 
 License
 -------
