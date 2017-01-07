@@ -11,7 +11,7 @@
  	<!-- Requirements -->
 
 	<requires>
-		<app_version min="7.2" max="7.3.99" />
+		<app_version min="7.3" max="7.3.99" />
 		<php_extension name="ldap" />
 	</requires>
  
@@ -64,7 +64,7 @@
 
 		<extension point="cerberusweb.ui.page.menu.item">
 			<id>ldap.setup.menu.plugins.ldap</id>
-			<name>LDAP Plugins Menu Item</name>
+			<name>LDAP</name>
 			<class>
 				<file>api/App.php</file>
 				<name>WgmLdap_SetupPluginsMenuItem</name>
