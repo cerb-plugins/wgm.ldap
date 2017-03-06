@@ -208,8 +208,8 @@ class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 					$fields = array(
 						DAO_Contact::CREATED_AT => time(),
 						DAO_Contact::PRIMARY_EMAIL_ID => $address->id,
-						DAO_Contact::FIRST_NAME => @$entries[0][strtolower($ldap_settings['field_firstname'])][0],
-						DAO_Contact::LAST_NAME => @$entries[0][strtolower($ldap_settings['field_lastname'])][0],
+						DAO_Contact::FIRST_NAME => @$entries[0][DevblocksPlatform::strLower($ldap_settings['field_firstname'])][0],
+						DAO_Contact::LAST_NAME => @$entries[0][DevblocksPlatform::strLower($ldap_settings['field_lastname'])][0],
 					);
 					$contact_id = DAO_Contact::create($fields);
 					
