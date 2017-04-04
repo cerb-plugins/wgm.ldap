@@ -36,24 +36,34 @@ class ChLdapLoginModule extends Extension_LoginAuthenticator {
 		
 		if(null == ($worker = $address->getWorker()))
 			return false;
-
+		
 		if($worker->auth_extension_id != $this->manifest->id)
 			return false;
 		
 		if($worker->is_disabled)
 			return false;
 		
-		$ldap_settings = array(
-			'host' => DevblocksPlatform::getPluginSetting('wgm.ldap', 'ldap_host', ''),
-			'port' => DevblocksPlatform::getPluginSetting('wgm.ldap', 'ldap_port', '389'),
-			'username' => DevblocksPlatform::getPluginSetting('wgm.ldap', 'ldap_username', ''),
-			'password' => DevblocksPlatform::getPluginSetting('wgm.ldap', 'ldap_password', ''),
+		$login_params = DevblocksPlatform::getPluginSetting('wgm.ldap', 'config_json', '{}', true);
+		
+		if(!isset($login_params['connected_account_id']) 
+			|| false == ($account = DAO_ConnectedAccount::get($login_params['connected_account_id']))
+			|| !($account instanceof Model_ConnectedAccount)
+			)
+			return false;
+		
+		$account_params = $account->decryptParams();
+		
+		$ldap_settings = [
+			'host' => @$account_params['host'],
+			'port' => @$account_params['port'] ?: 389,
+			'username' => @$account_params['bind_dn'],
+			'password' => @$account_params['bind_password'],
 			
-			'context_search' => DevblocksPlatform::getPluginSetting('wgm.ldap', 'priv_auth_context_search', ''),
-			'field_email' => DevblocksPlatform::getPluginSetting('wgm.ldap', 'priv_auth_field_email', ''),
-			'field_firstname' => DevblocksPlatform::getPluginSetting('wgm.ldap', 'priv_auth_field_firstname', ''),
-			'field_lastname' => DevblocksPlatform::getPluginSetting('wgm.ldap', 'priv_auth_field_lastname', ''),
-		);
+			'context_search' => @$login_params['context_search'],
+			'field_email' => @$login_params['field_email'],
+			'field_firstname' => @$login_params['field_firstname'],
+			'field_lastname' => @$login_params['field_lastname'],
+		];
 		
 		@$ldap = ldap_connect($ldap_settings['host'], $ldap_settings['port']);
 		
@@ -103,9 +113,40 @@ class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 		
 		switch($module) {
 			default:
+				$login_params = DAO_CommunityToolProperty::get(ChPortalHelper::getCode(), 'wgm.ldap.config_json', '{}', true);
+				
+				$params = [
+					'login_prompt' => @$login_params['login_prompt'],
+				];
+				$tpl->assign('params', $params);
+				
 				$tpl->display("devblocks:wgm.ldap:portal_".ChPortalHelper::getCode().":support_center/login/ldap.tpl");
 				break;
 		}
+	}
+	
+	function renderConfigForm(Model_CommunityTool $instance) {
+		$tpl = DevblocksPlatform::getTemplateService();
+
+		$tpl->assign('instance', $instance);
+		$tpl->assign('extension', $this);
+		
+		$login_params = DAO_CommunityToolProperty::get($instance->code, 'wgm.ldap.config_json', '{}', true);
+		$tpl->assign('login_params', $login_params);
+		
+		$tpl->display('devblocks:wgm.ldap::setup/config.tpl');
+	}
+	
+	function saveConfiguration(Model_CommunityTool $instance) {
+		@$params = DevblocksPlatform::importGPC($_REQUEST['login_params'], 'array', []);
+		
+		if(!isset($params[$this->id]))
+			return;
+		
+		$params = $params[$this->id];
+		
+		DAO_CommunityToolProperty::set($instance->code, 'wgm.ldap.config_json', json_encode($params));
+		return true;
 	}
 	
 	function authenticateAction() {
@@ -132,26 +173,33 @@ class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 			
 			// Validate email address
 			
-			$valid_email = imap_rfc822_parse_adrlist($email,'host');
+			$valid_email = imap_rfc822_parse_adrlist($email, 'host');
 			
 			if(empty($valid_email) || !is_array($valid_email) || empty($valid_email[0]->host) || $valid_email[0]->host=='host')
 				throw new Exception("Please provide a valid email address.");
 			
 			$email = $valid_email[0]->mailbox . '@' . $valid_email[0]->host;
-
-			// LDAP
-			$ldap_settings = array(
-				'host' => DevblocksPlatform::getPluginSetting('wgm.ldap', 'ldap_host', ''),
-				'port' => DevblocksPlatform::getPluginSetting('wgm.ldap', 'ldap_port', '389'),
-				'username' => DevblocksPlatform::getPluginSetting('wgm.ldap', 'ldap_username', ''),
-				'password' => DevblocksPlatform::getPluginSetting('wgm.ldap', 'ldap_password', ''),
-				
-				'context_search' => DevblocksPlatform::getPluginSetting('wgm.ldap', 'pub_auth_context_search', ''),
-				'field_email' => DevblocksPlatform::getPluginSetting('wgm.ldap', 'pub_auth_field_email', ''),
-				'field_firstname' => DevblocksPlatform::getPluginSetting('wgm.ldap', 'pub_auth_field_firstname', ''),
-				'field_lastname' => DevblocksPlatform::getPluginSetting('wgm.ldap', 'pub_auth_field_lastname', ''),
-			);
 			
+			$login_params = DAO_CommunityToolProperty::get(ChPortalHelper::getCode(), 'wgm.ldap.config_json', '{}', true);
+			
+			if(!isset($login_params['connected_account_id']) || false == ($account = DAO_ConnectedAccount::get($login_params['connected_account_id']))) {
+				throw new Exception("The authentication server is offline. Please try again later.");
+			}
+			
+			$account_params = $account->decryptParams();
+			
+			$ldap_settings = [
+				'host' => @$account_params['host'],
+				'port' => @$account_params['port'] ?: 389,
+				'username' => @$account_params['bind_dn'],
+				'password' => @$account_params['bind_password'],
+				
+				'context_search' => @$login_params['context_search'],
+				'field_email' => @$login_params['field_email'],
+				'field_firstname' => @$login_params['field_firstname'],
+				'field_lastname' => @$login_params['field_lastname'],
+			];
+
 			@$ldap = ldap_connect($ldap_settings['host'], $ldap_settings['port']);
 			
 			if(!$ldap)
@@ -205,11 +253,14 @@ class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 					}
 					
 				} else { // create
+					$given_name = @$entries[0][DevblocksPlatform::strLower($ldap_settings['field_firstname'])][0];
+					$surname = @$entries[0][DevblocksPlatform::strLower($ldap_settings['field_lastname'])][0];
+					
 					$fields = array(
 						DAO_Contact::CREATED_AT => time(),
 						DAO_Contact::PRIMARY_EMAIL_ID => $address->id,
-						DAO_Contact::FIRST_NAME => @$entries[0][DevblocksPlatform::strLower($ldap_settings['field_firstname'])][0],
-						DAO_Contact::LAST_NAME => @$entries[0][DevblocksPlatform::strLower($ldap_settings['field_lastname'])][0],
+						DAO_Contact::FIRST_NAME => $given_name ?: '',
+						DAO_Contact::LAST_NAME => $surname ?: '',
 					);
 					$contact_id = DAO_Contact::create($fields);
 					
@@ -271,24 +322,9 @@ class WgmLdap_SetupSection extends Extension_PageSection {
 		$visit = CerberusApplication::getVisit();
 		$visit->set(ChConfigurationPage::ID, 'ldap');
 		
-		$params = array(
-			'ldap_host' => DevblocksPlatform::getPluginSetting('wgm.ldap','ldap_host',''),
-			'ldap_port' => DevblocksPlatform::getPluginSetting('wgm.ldap','ldap_port',389),
-			'ldap_username' => DevblocksPlatform::getPluginSetting('wgm.ldap','ldap_username',''),
-			'ldap_password' => DevblocksPlatform::getPluginSetting('wgm.ldap','ldap_password',''),
-			
-			'priv_auth_context_search' => DevblocksPlatform::getPluginSetting('wgm.ldap','priv_auth_context_search',''),
-			'priv_auth_field_email' => DevblocksPlatform::getPluginSetting('wgm.ldap','priv_auth_field_email',''),
-			'priv_auth_field_firstname' => DevblocksPlatform::getPluginSetting('wgm.ldap','priv_auth_field_firstname',''),
-			'priv_auth_field_lastname' => DevblocksPlatform::getPluginSetting('wgm.ldap','priv_auth_field_lastname',''),
-			
-			'pub_auth_context_search' => DevblocksPlatform::getPluginSetting('wgm.ldap','pub_auth_context_search',''),
-			'pub_auth_field_email' => DevblocksPlatform::getPluginSetting('wgm.ldap','pub_auth_field_email',''),
-			'pub_auth_field_firstname' => DevblocksPlatform::getPluginSetting('wgm.ldap','pub_auth_field_firstname',''),
-			'pub_auth_field_lastname' => DevblocksPlatform::getPluginSetting('wgm.ldap','pub_auth_field_lastname',''),
-		);
-		
+		$params = DevblocksPlatform::getPluginSetting('wgm.ldap', 'config_json', '{}', true);
 		$tpl->assign('params', $params);
+		
 		$tpl->assign('extensions', $extensions);
 		
 		$tpl->display('devblocks:wgm.ldap::setup/index.tpl');
@@ -303,80 +339,55 @@ class WgmLdap_SetupSection extends Extension_PageSection {
 			 * LDAP Auth
 			 */
 			
-			@$ldap_host = DevblocksPlatform::importGPC($_REQUEST['ldap_host'],'string','');
-			@$ldap_port = DevblocksPlatform::importGPC($_REQUEST['ldap_port'],'integer',389);
-			@$ldap_username = DevblocksPlatform::importGPC($_REQUEST['ldap_username'],'string','');
-			@$ldap_password = DevblocksPlatform::importGPC($_REQUEST['ldap_password'],'string','');
+			@$params = DevblocksPlatform::importGPC($_REQUEST['params'],'array',[]);
 			
-			if(empty($ldap_host) || empty($ldap_port) || empty($ldap_username) || empty($ldap_password))
-				throw new Exception("The LDAP connection details are required.");
+			if(!isset($params['connected_account_id']) 
+				|| false == ($account = DAO_ConnectedAccount::get($params['connected_account_id']))
+				|| !($account instanceof Model_ConnectedAccount)
+				)
+				throw new Exception("The LDAP connected account is invalid.");
 			
-			@$ldap = ldap_connect($ldap_host, $ldap_port);
+			$ldap_params = $account->decryptParams();
+				
+			@$ldap = ldap_connect(@$ldap_params['host'], @$ldap_params['port']);
 			
 			if(!$ldap)
-				throw new Exception("Failed to connect to worker auth host.");
+				throw new Exception('LDAP server error: ' . ldap_error($ldap));
 			
 			ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
 			ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
 			
-			@$login = ldap_bind($ldap, $ldap_username, $ldap_password);
+			@$login = ldap_bind($ldap, @$ldap_params['bind_dn'], @$ldap_params['bind_password']);
 			
 			if(!$login)
-				throw new Exception("Failed to authenticate on worker auth host.");
-			
-			DevblocksPlatform::setPluginSetting('wgm.ldap','ldap_host',$ldap_host);
-			DevblocksPlatform::setPluginSetting('wgm.ldap','ldap_port',$ldap_port);
-			DevblocksPlatform::setPluginSetting('wgm.ldap','ldap_username',$ldap_username);
-			DevblocksPlatform::setPluginSetting('wgm.ldap','ldap_password',$ldap_password);
+				throw new Exception('LDAP server error: ' . ldap_error($ldap));
 			
 			/*
 			 * Worker auth
 			 */
 			
-			@$priv_auth_context_search = DevblocksPlatform::importGPC($_REQUEST['priv_auth_context_search'],'string','');
-			@$priv_auth_field_email = DevblocksPlatform::importGPC($_REQUEST['priv_auth_field_email'],'string','');
-			@$priv_auth_field_firstname = DevblocksPlatform::importGPC($_REQUEST['priv_auth_field_firstname'],'string','');
-			@$priv_auth_field_lastname = DevblocksPlatform::importGPC($_REQUEST['priv_auth_field_lastname'],'string','');
+			if(empty(@$params['context_search']))
+				throw new Exception("The 'search context' is required.");
 			
-			$query = sprintf("(%s=*)", $priv_auth_field_email);
-			@$results = ldap_search($ldap, $priv_auth_context_search, $query, array($priv_auth_field_email), 0, 1);
+			if(empty(@$params['field_email']))
+				throw new Exception("The 'email field' is required.");
 			
-			if(!$results)
-				throw new Exception("Failed to retrieve worker search results.");
-				
-			DevblocksPlatform::setPluginSetting('wgm.ldap','priv_auth_context_search',$priv_auth_context_search);
-			DevblocksPlatform::setPluginSetting('wgm.ldap','priv_auth_field_email',$priv_auth_field_email);
-			DevblocksPlatform::setPluginSetting('wgm.ldap','priv_auth_field_firstname',$priv_auth_field_firstname);
-			DevblocksPlatform::setPluginSetting('wgm.ldap','priv_auth_field_lastname',$priv_auth_field_lastname);
-			
-			/*
-			 * Customer auth
-			 */
-			
-			@$pub_auth_context_search = DevblocksPlatform::importGPC($_REQUEST['pub_auth_context_search'],'string','');
-			@$pub_auth_field_email = DevblocksPlatform::importGPC($_REQUEST['pub_auth_field_email'],'string','');
-			@$pub_auth_field_firstname = DevblocksPlatform::importGPC($_REQUEST['pub_auth_field_firstname'],'string','');
-			@$pub_auth_field_lastname = DevblocksPlatform::importGPC($_REQUEST['pub_auth_field_lastname'],'string','');
-
-			$query = sprintf("(%s=*)", $pub_auth_field_email);
-			@$results = ldap_search($ldap, $pub_auth_context_search, $query, array($pub_auth_field_email), 0, 1);
+			$query = sprintf("(%s=*)", @$params['field_email']);
+			@$results = ldap_search($ldap, @$params['context_search'], $query, array(@$params['field_email']), 0, 1);
 			
 			if(!$results)
-				throw new Exception("Failed to retrieve customer search results.");
-				
-			DevblocksPlatform::setPluginSetting('wgm.ldap','pub_auth_context_search',$pub_auth_context_search);
-			DevblocksPlatform::setPluginSetting('wgm.ldap','pub_auth_field_email',$pub_auth_field_email);
-			DevblocksPlatform::setPluginSetting('wgm.ldap','pub_auth_field_firstname',$pub_auth_field_firstname);
-			DevblocksPlatform::setPluginSetting('wgm.ldap','pub_auth_field_lastname',$pub_auth_field_lastname);
-
+				throw new Exception('LDAP search error: ' . ldap_error($ldap));
+			
+			DevblocksPlatform::setPluginSetting('wgm.ldap','config_json', $params, true);
+			
 			@ldap_unbind($ldap);
 			
-		    echo json_encode(array('status'=>true,'message'=>'Saved!'));
-		    return;
+			echo json_encode(array('status'=>true,'message'=>'Saved!'));
+			return;
 			
 		} catch (Exception $e) {
 			@ldap_unbind($ldap);
-							
+			
 			echo json_encode(array('status'=>false,'error'=>$e->getMessage()));
 			return;
 		}
@@ -384,3 +395,71 @@ class WgmLdap_SetupSection extends Extension_PageSection {
 	
 };
 endif;
+
+class ServiceProvider_Ldap extends Extension_ServiceProvider {
+	const ID = 'wgm.ldap.service.provider';
+	
+	private function _testLdap($params) {
+		if(!extension_loaded('ldap'))
+			return "The 'ldap' extension is not enabled.";
+		
+		if(!isset($params['host']) || empty($params['host']))
+			return "The 'Host' is required.";
+		
+		if(!isset($params['port']) || empty($params['port']))
+			return "The 'Port' is required.";
+		
+		if(!isset($params['bind_dn']) || empty($params['bind_dn']))
+			return "The 'Bind DN' is required.";
+		
+		if(!isset($params['bind_password']) || empty($params['bind_password']))
+			return "The 'Bind Password' is required.";
+		
+		// Test the credentials
+		
+		@$ldap = ldap_connect($params['host'], $params['port']);
+		
+		if(!$ldap)
+			return ldap_error($ldap);
+		
+		ldap_set_option($ldap, LDAP_OPT_PROTOCOL_VERSION, 3);
+		ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
+		
+		@$login = ldap_bind($ldap, $params['bind_dn'], $params['bind_password']);
+		
+		if(empty($login))
+			return ldap_error($ldap);
+		
+		return true;
+	}
+	
+	function renderConfigForm(Model_ConnectedAccount $account) {
+		$tpl = DevblocksPlatform::getTemplateService();
+		$active_worker = CerberusApplication::getActiveWorker();
+		
+		$params = $account->decryptParams($active_worker);
+		$tpl->assign('params', $params);
+		
+		$tpl->display('devblocks:wgm.ldap::provider/edit_params.tpl');
+	}
+	
+	function saveConfigForm(Model_ConnectedAccount $account, array &$params) {
+		@$edit_params = DevblocksPlatform::importGPC($_REQUEST['params'], 'array', []);
+		
+		if(true !== ($result = $this->_testLdap($edit_params)))
+			return $result;
+		
+		foreach($edit_params as $k => $v) {
+			switch($k) {
+				case 'host':
+				case 'port':
+				case 'bind_dn':
+				case 'bind_password':
+					$params[$k] = $v;
+					break;
+			}
+		}
+		
+		return true;
+	}
+}

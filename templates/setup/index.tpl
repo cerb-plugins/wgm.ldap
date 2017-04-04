@@ -10,75 +10,42 @@
 	<input type="hidden" name="_csrf_token" value="{$session.csrf_token}">
 	
 	<fieldset style="float:left;width:30%;">
-		<legend>Directory</legend>
-
-		<b>Host:*</b><br>
-		<input type="text" name="ldap_host" value="{$params.ldap_host}" size="64"><br>
-		<i>example: ldap.example.com</i><br>
-		<br>
-		
-		<b>Port:*</b><br>
-		<input type="text" name="ldap_port" value="{$params.ldap_port}" size="5"><br>
-		<i>example: 389</i><br>
-		<br>
-		
-		<b>LDAP User:*</b><br>
-		<input type="text" name="ldap_username" value="{$params.ldap_username}" size="64"><br>
-		<i>example: cn=admin,OU=users,DC=example,DC=com</i><br>
-		<br>
-		
-		<b>LDAP Password:*</b><br>
-		<input type="password" name="ldap_password" value="{$params.ldap_password}" size="64"><br>
-		<br>
-	</fieldset>
-	
-	<fieldset style="float:left;width:30%;">
 		<legend>Worker authentication</legend>
 
-		<b>Search context:*</b><br>
-		<input type="text" name="priv_auth_context_search" value="{$params.priv_auth_context_search}" size="64"><br>
+		<b>Connected account:</b><br>
+		<button type="button" class="cerb-chooser-trigger" data-field-name="params[connected_account_id]" data-context="{CerberusContexts::CONTEXT_CONNECTED_ACCOUNT}" data-single="true" data-query="service:ldap"><span class="glyphicons glyphicons-search"></span></button>
+		
+		<ul class="bubbles chooser-container">
+			{if $params.connected_account_id}
+				{$account = DAO_ConnectedAccount::get($params.connected_account_id)}
+				{if $account}
+					<li><input type="hidden" name="params[connected_account_id]" value="{$account->id}"><a href="javascript:;" class="cerb-peek-trigger no-underline" data-context="{CerberusContexts::CONTEXT_CONNECTED_ACCOUNT}" data-context-id="{$account->id}">{$account->name}</a></li>
+				{/if}
+			{/if}
+		</ul>
+		<br>
+		<br>
+		
+		<b>Search context:</b><br>
+		<input type="text" name="params[context_search]" value="{$params.context_search}" size="64"><br>
 		<i>example: OU=staff,DC=example,DC=com</i><br>
 		<br>
 		
-		<b>Email field:*</b><br>
-		<input type="text" name="priv_auth_field_email" value="{$params.priv_auth_field_email}" size="64"><br>
+		<b>Email field:</b><br>
+		<input type="text" name="params[field_email]" value="{$params.field_email}" size="64"><br>
 		<i>example: mail</i><br>
 		<br>
 		
 		<b>First name (given name) field:</b> (optional)<br>
-		<input type="text" name="priv_auth_field_firstname" value="{$params.priv_auth_field_firstname}" size="64"><br>
+		<input type="text" name="params[field_firstname]" value="{$params.field_firstname}" size="64"><br>
 		<i>example: givenName</i><br>
 		<br>
 		
 		<b>Last name (surname) field:</b> (optional)<br>
-		<input type="text" name="priv_auth_field_lastname" value="{$params.priv_auth_field_lastname}" size="64"><br>
+		<input type="text" name="params[field_lastname]" value="{$params.field_lastname}" size="64"><br>
 		<i>example: sn</i><br>
 		<br>
 		
-	</fieldset>
-	
-	<fieldset style="float:left;width:30%;">
-		<legend>Customer authentication</legend>
-
-		<b>Search context:*</b><br>
-		<input type="text" name="pub_auth_context_search" value="{$params.pub_auth_context_search}" size="64"><br>
-		<i>example: OU=customers,DC=example,DC=com</i><br>
-		<br>
-		
-		<b>Email field:*</b><br>
-		<input type="text" name="pub_auth_field_email" value="{$params.pub_auth_field_email}" size="64"><br>
-		<i>example: mail</i><br>
-		<br>
-		
-		<b>First name (given name) field:</b> (optional)<br>
-		<input type="text" name="pub_auth_field_firstname" value="{$params.pub_auth_field_firstname}" size="64"><br>
-		<i>example: givenName</i><br>
-		<br>
-		
-		<b>Last name (surname) field:</b> (optional)<br>
-		<input type="text" name="pub_auth_field_lastname" value="{$params.pub_auth_field_lastname}" size="64"><br>
-		<i>example: sn</i><br>
-		<br>
 	</fieldset>
 	
 	<br clear="all">
@@ -88,17 +55,29 @@
 </form>
 
 <script type="text/javascript">
-$('#frmSetupLdap BUTTON.submit')
-	.click(function(e) {
-		genericAjaxPost('frmSetupLdap','',null,function(json) {
-			$o = $.parseJSON(json);
-			if(false == $o || false == $o.status) {
-				Devblocks.showError('#frmSetupLdap div.status',$o.error);
-			} else {
-				Devblocks.showSuccess('#frmSetupLdap div.status',$o.message);
-			}
-		});
-	})
-;
+$(function() {
+	var $frm = $('#frmSetupLdap');
+	
+	$frm.find('BUTTON.submit')
+		.click(function(e) {
+			genericAjaxPost($frm,'',null,function(json) {
+				$o = $.parseJSON(json);
+				if(false == $o || false == $o.status) {
+					Devblocks.showError('#frmSetupLdap div.status',$o.error);
+				} else {
+					Devblocks.showSuccess('#frmSetupLdap div.status',$o.message);
+				}
+			});
+		})
+	;
+	
+	$frm.find('.cerb-peek-trigger')
+		.cerbPeekTrigger()
+	;
+
+	$frm.find('.cerb-chooser-trigger')
+		.cerbChooserTrigger()
+	;
+});
 </script>
 {/if}

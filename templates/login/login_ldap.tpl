@@ -12,7 +12,7 @@
 
 	<table cellpadding="0" cellspacing="2">
 	<tr>
-		<td align="right" valign="middle">{'common.email'|devblocks_translate|capitalize}:</td>
+		<td align="right" valign="middle">{'common.email'|devblocks_translate|capitalize}: </td>
 		<td>
 			{if !empty($email)}
 				<b>{$email}</b>
@@ -25,7 +25,7 @@
 		</td>
 	</tr>
 	<tr>
-		<td align="right" valign="middle">{'common.password'|devblocks_translate|capitalize}:</td>
+		<td align="right" valign="middle">{'common.password'|devblocks_translate|capitalize}: </td>
 		<td nowrap="nowrap">
 			<input type="password" name="password" size="16" autocomplete="off">
 		</td>

@@ -6,7 +6,7 @@
 {/if}
 
 <fieldset>
-	<legend>Sign on using LDAP</legend>
+	<legend>{$params.login_prompt|default:'Log in with LDAP'}</legend>
 	
 	<b>Email:</b><br>
 	<input type="text" name="email" size="45"><br>
@@ -22,7 +22,7 @@
 {include file="devblocks:cerberusweb.support_center::support_center/login/switcher.tpl"}
 
 <script type="text/javascript">
-	$(function() {
-		$('#loginLDAP input:text').first().focus().select();
-	});
+$(function() {
+	$('#loginLDAP input:text').first().focus().select();
+});
 </script>
