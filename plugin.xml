@@ -11,20 +11,20 @@
  	<!-- Requirements -->
 
 	<requires>
-		<app_version min="7.4.0" max="7.4.99" />
+		<app_version min="8.0" max="8.0.99" />
 		<php_extension name="ldap" />
 	</requires>
  
 	<!-- Plugin Dependencies -->
 	
 	<dependencies>
-		<require plugin_id="cerberusweb.core" version="7.4.0" />
+		<require plugin_id="cerberusweb.core" version="8.0.0" />
 	</dependencies>
 	
 	<!-- Patches -->
 	
 	<patches>
-		<patch version="7.4.0" revision="1" file="patches/7.4.0.php" />
+		<patch version="8.0.0" revision="1" file="patches/8.0.0.php" />
 	</patches>
 
 	<!-- Templates -->
