@@ -8,7 +8,7 @@ class ChLdapLoginModule extends Extension_LoginAuthenticator {
 		@array_shift($stack); // login
 		
 		// draws HTML form of controls needed for login information
-		$tpl = DevblocksPlatform::getTemplateService();
+		$tpl = DevblocksPlatform::services()->template();
 		
 		@$email = DevblocksPlatform::importGPC($_REQUEST['email'],'string','');
 		$tpl->assign('email', $email);
@@ -105,7 +105,7 @@ endif;
 if(class_exists('Extension_ScLoginAuthenticator',true)):
 class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 	function writeResponse(DevblocksHttpResponse $response) {
-		$tpl = DevblocksPlatform::getTemplateSandboxService();
+		$tpl = DevblocksPlatform::services()->templateSandbox();
 		$umsession = ChPortalHelper::getSession();
 		
 		$stack = $response->path;
@@ -126,7 +126,7 @@ class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 	}
 	
 	function renderConfigForm(Model_CommunityTool $instance) {
-		$tpl = DevblocksPlatform::getTemplateService();
+		$tpl = DevblocksPlatform::services()->template();
 
 		$tpl->assign('instance', $instance);
 		$tpl->assign('extension', $this);
@@ -151,8 +151,8 @@ class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 	
 	function authenticateAction() {
 		$umsession = ChPortalHelper::getSession();
-		$url_writer = DevblocksPlatform::getUrlService();
-		$tpl = DevblocksPlatform::getTemplateService();
+		$url_writer = DevblocksPlatform::services()->url();
+		$tpl = DevblocksPlatform::services()->template();
 
 		// Clear the past session
 		$umsession->logout();
@@ -301,7 +301,7 @@ class WgmLdap_SetupPluginsMenuItem extends Extension_PageMenuItem {
 	const POINT = 'ldap.setup.menu.plugins.ldap';
 	
 	function render() {
-		$tpl = DevblocksPlatform::getTemplateService();
+		$tpl = DevblocksPlatform::services()->template();
 		$tpl->assign('extension', $this);
 		$tpl->display('devblocks:wgm.ldap::setup/menu_item.tpl');
 	}
@@ -317,7 +317,7 @@ class WgmLdap_SetupSection extends Extension_PageSection {
 		$extensions = array(
 			'ldap' => extension_loaded('ldap')
 		);
-		$tpl = DevblocksPlatform::getTemplateService();
+		$tpl = DevblocksPlatform::services()->template();
 
 		$visit = CerberusApplication::getVisit();
 		$visit->set(ChConfigurationPage::ID, 'ldap');
@@ -434,7 +434,7 @@ class ServiceProvider_Ldap extends Extension_ServiceProvider {
 	}
 	
 	function renderConfigForm(Model_ConnectedAccount $account) {
-		$tpl = DevblocksPlatform::getTemplateService();
+		$tpl = DevblocksPlatform::services()->template();
 		$active_worker = CerberusApplication::getActiveWorker();
 		
 		$params = $account->decryptParams($active_worker);
