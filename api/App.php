@@ -43,7 +43,7 @@ class ChLdapLoginModule extends Extension_LoginAuthenticator {
 		if($worker->is_disabled)
 			return false;
 		
-		$login_params = DevblocksPlatform::getPluginSetting('wgm.ldap', 'config_json', '{}', true);
+		$login_params = DevblocksPlatform::getPluginSetting('wgm.ldap', 'config_json', [], true);
 		
 		if(!isset($login_params['connected_account_id']) 
 			|| false == ($account = DAO_ConnectedAccount::get($login_params['connected_account_id']))
@@ -74,7 +74,7 @@ class ChLdapLoginModule extends Extension_LoginAuthenticator {
 		ldap_set_option($ldap, LDAP_OPT_REFERRALS, 0);
 		
 		@$login = ldap_bind($ldap, $ldap_settings['username'], $ldap_settings['password']);
-
+		
 		if(!$login)
 			return false;
 	
@@ -82,7 +82,7 @@ class ChLdapLoginModule extends Extension_LoginAuthenticator {
 		@$results = ldap_search($ldap, $ldap_settings['context_search'], $query);
 		@$entries = ldap_get_entries($ldap, $results);
 		@$count = intval($entries['count']);
-
+		
 		if(empty($count))
 			return false;
 		
@@ -322,7 +322,7 @@ class WgmLdap_SetupSection extends Extension_PageSection {
 		$visit = CerberusApplication::getVisit();
 		$visit->set(ChConfigurationPage::ID, 'ldap');
 		
-		$params = DevblocksPlatform::getPluginSetting('wgm.ldap', 'config_json', '{}', true);
+		$params = DevblocksPlatform::getPluginSetting('wgm.ldap', 'config_json', [], true);
 		$tpl->assign('params', $params);
 		
 		$tpl->assign('extensions', $extensions);
