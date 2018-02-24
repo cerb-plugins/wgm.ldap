@@ -31,7 +31,7 @@ class ChLdapLoginModule extends Extension_LoginAuthenticator {
 			return false;
 		
 		// Look up worker by email
-		if(null == ($address = DAO_AddressToWorker::getByEmail($email)))
+		if(null == ($address = DAO_Address::getByEmail($email)))
 			return false;
 		
 		if(null == ($worker = $address->getWorker()))
@@ -78,7 +78,7 @@ class ChLdapLoginModule extends Extension_LoginAuthenticator {
 		if(!$login)
 			return false;
 	
-		$query = sprintf("(%s=%s)", $ldap_settings['field_email'], $address->getEmailAsString());
+		$query = sprintf("(%s=%s)", $ldap_settings['field_email'], $address->email);
 		@$results = ldap_search($ldap, $ldap_settings['context_search'], $query);
 		@$entries = ldap_get_entries($ldap, $results);
 		@$count = intval($entries['count']);
@@ -237,7 +237,7 @@ class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 						throw new Exception("Your account could not be created. Please try again later.");
 					
 					if($address->is_banned)
-						throw new Exception("The provided email address is not available.");
+						throw new Exception("email.unavailable");
 				}
 				
 				// See if the contact person exists or not
@@ -282,7 +282,7 @@ class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 				}
 				
 			} else {
-				throw new Exception("Invalid password.");
+				throw new Exception("auth.failed");
 			}
 					
 		} catch (Exception $e) {

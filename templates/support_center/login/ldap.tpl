@@ -2,7 +2,7 @@
 <input type="hidden" name="_csrf_token" value="{$session->csrf_token}">
 
 {if !empty($error)}
-<div class="error">{$error}</div>
+<div class="error">{ChSignInPage::getErrorMessage($error)}</div>
 {/if}
 
 <fieldset>
