@@ -14,7 +14,11 @@ class ChLdapLoginModule extends Extension_LoginAuthenticator {
 		$tpl->assign('email', $email);
 		
 		@$error = DevblocksPlatform::importGPC($_REQUEST['error'],'string','');
-		$tpl->assign('error', $error);
+		
+		if($error) {
+			$error_msg = ChSignInPage::getErrorMessage($error);
+			$tpl->assign('error', $error_msg);
+		}
 		
 		$tpl->display('devblocks:wgm.ldap::login/login_ldap.tpl');
 	}
@@ -106,7 +110,6 @@ if(class_exists('Extension_ScLoginAuthenticator',true)):
 class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 	function writeResponse(DevblocksHttpResponse $response) {
 		$tpl = DevblocksPlatform::services()->templateSandbox();
-		$umsession = ChPortalHelper::getSession();
 		
 		$stack = $response->path;
 		@$module = array_shift($stack);
@@ -151,7 +154,6 @@ class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 	
 	function authenticateAction() {
 		$umsession = ChPortalHelper::getSession();
-		$url_writer = DevblocksPlatform::services()->url();
 		$tpl = DevblocksPlatform::services()->template();
 
 		// Clear the past session
@@ -219,7 +221,7 @@ class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 			@$count = intval($entries['count']);
 			
 			if(empty($count))
-				throw new Exception("User not found.");
+				throw new Exception("auth.failed");
 			
 			// Rebind as the customer DN
 			
@@ -284,9 +286,14 @@ class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 			} else {
 				throw new Exception("auth.failed");
 			}
-					
+			
 		} catch (Exception $e) {
-			$tpl->assign('error', $e->getMessage());
+			$error = $e->getMessage();
+			
+			if($error) {
+				$error_msg = ChSignInPage::getErrorMessage($error);
+				$tpl->assign('error', $error_msg);
+			}
 		}
 		
 		@ldap_unbind($ldap);
