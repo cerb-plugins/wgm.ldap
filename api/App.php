@@ -9,13 +9,6 @@ class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 		
 		switch($module) {
 			default:
-				$login_params = DAO_CommunityToolProperty::get(ChPortalHelper::getCode(), 'wgm.ldap.config_json', '{}', true);
-				
-				$params = [
-					'login_prompt' => @$login_params['login_prompt'],
-				];
-				$tpl->assign('params', $params);
-				
 				$tpl->display("devblocks:wgm.ldap:portal_".ChPortalHelper::getCode().":support_center/login/ldap.tpl");
 				break;
 		}
@@ -27,21 +20,19 @@ class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 		$tpl->assign('instance', $instance);
 		$tpl->assign('extension', $this);
 		
-		$login_params = DAO_CommunityToolProperty::get($instance->code, 'wgm.ldap.config_json', '{}', true);
-		$tpl->assign('login_params', $login_params);
+		$ldap_service_id = DAO_CommunityToolProperty::get($instance->code, 'sso.ldap.service_id', 0);
+		$tpl->assign('ldap_service_id', $ldap_service_id);
 		
-		$tpl->display('devblocks:wgm.ldap::setup/config.tpl');
+		$tpl->display('devblocks:wgm.ldap::support_center/login/config.tpl');
 	}
 	
 	function saveConfiguration(Model_CommunityTool $instance) {
-		@$params = DevblocksPlatform::importGPC($_REQUEST['login_params'], 'array', []);
+		@$params = DevblocksPlatform::importGPC($_REQUEST['params'], 'array', []);
 		
-		if(!isset($params[$this->id]))
-			return;
+		@$ldap_service_id = DevblocksPlatform::importGPC($params['ldap_service_id'], 'int', 0);
 		
-		$params = $params[$this->id];
 		
-		DAO_CommunityToolProperty::set($instance->code, 'wgm.ldap.config_json', json_encode($params));
+		DAO_CommunityToolProperty::set($instance->code, 'sso.ldap.service_id', $ldap_service_id);
 		return true;
 	}
 	
@@ -75,24 +66,24 @@ class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 			
 			$email = $valid_email[0]->mailbox . '@' . $valid_email[0]->host;
 			
-			$login_params = DAO_CommunityToolProperty::get(ChPortalHelper::getCode(), 'wgm.ldap.config_json', '{}', true);
+			$ldap_service_id = DAO_CommunityToolProperty::get(ChPortalHelper::getCode(), 'sso.ldap.service_id', 0);
 			
-			if(!isset($login_params['connected_account_id']) || false == ($account = DAO_ConnectedAccount::get($login_params['connected_account_id']))) {
+			if(!$ldap_service_id || false == ($service = DAO_ConnectedService::get($ldap_service_id))) {
 				throw new Exception("The authentication server is offline. Please try again later.");
 			}
 			
-			$account_params = $account->decryptParams();
+			$service_params = $service->decryptParams();
 			
 			$ldap_settings = [
-				'host' => @$account_params['host'],
-				'port' => @$account_params['port'] ?: 389,
-				'username' => @$account_params['bind_dn'],
-				'password' => @$account_params['bind_password'],
+				'host' => @$service_params['host'],
+				'port' => @$service_params['port'] ?: 389,
+				'username' => @$service_params['bind_dn'],
+				'password' => @$service_params['bind_password'],
 				
-				'context_search' => @$login_params['context_search'],
-				'field_email' => @$login_params['field_email'],
-				'field_firstname' => @$login_params['field_firstname'],
-				'field_lastname' => @$login_params['field_lastname'],
+				'context_search' => @$service_params['context_search'],
+				'field_email' => @$service_params['field_email'],
+				'field_firstname' => @$service_params['field_firstname'],
+				'field_lastname' => @$service_params['field_lastname'],
 			];
 
 			@$ldap = ldap_connect($ldap_settings['host'], $ldap_settings['port']);
@@ -184,7 +175,7 @@ class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 			$error = $e->getMessage();
 			
 			if($error) {
-				$error_msg = ChSignInPage::getErrorMessage($error);
+				$error_msg = Page_Login::getErrorMessage($error);
 				$tpl->assign('error', $error_msg);
 			}
 		}
