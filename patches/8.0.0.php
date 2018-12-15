@@ -1,7 +1,5 @@
 <?php
 $db = DevblocksPlatform::services()->database();
-$logger = DevblocksPlatform::services()->log();
-$tables = $db->metaTables();
 $encrypt = DevblocksPlatform::services()->encryption();
 
 // ===========================================================================

@@ -37,39 +37,6 @@
  
 	<extensions>
 	
-		<!-- Connected Services -->
-		
-		<extension point="cerb.service.provider">
-			<id>wgm.ldap.service.provider</id>
-			<name>LDAP</name>
-			<class>
-				<file>api/App.php</file>
-				<name>ServiceProvider_Ldap</name>
-			</class>
-			<params>
-				<param key="contexts">
-					<value>
-						<data key="cerberusweb.contexts.app" />
-						<data key="cerberusweb.contexts.worker" />
-					</value>
-				</param>
-			</params>
-		</extension>
-
-		<!--  Login Extensions -->
-
-		<extension point="cerberusweb.login">
-			<id>login.ldap</id>
-			<name>LDAP</name>
-			<class>
-				<file>api/App.php</file>
-				<name>ChLdapLoginModule</name>
-			</class>
-			<params>
-				<param key="uri" value="ldap" />
-			</params>
-		</extension>
-		
 		<!-- Support Center Login Authenticator -->
 		
 		<extension point="usermeet.login.authenticator">
@@ -85,35 +52,5 @@
 			</params>
 		</extension>
 		
-		<!-- Setup Page Menu Item -->
-
-		<extension point="cerberusweb.ui.page.menu.item">
-			<id>ldap.setup.menu.plugins.ldap</id>
-			<name>LDAP</name>
-			<class>
-				<file>api/App.php</file>
-				<name>WgmLdap_SetupPluginsMenuItem</name>
-			</class>
-			<params>
-				<param key="page_id" value="core.page.configuration" />
-				<param key="menu_id" value="core.setup.menu.services" />
-			</params>
-		</extension>
-		
-		<!-- Setup Page Sections -->
-		
-		<extension point="cerberusweb.ui.page.section">
-			<id>ldap.setup.section</id>
-			<name>Setup Page LDAP Section</name>
-			<class>
-				<file>api/App.php</file>
-				<name>WgmLdap_SetupSection</name>
-			</class>
-			<params>
-				<param key="page_id" value="core.page.configuration" />
-				<param key="uri" value="ldap" />
-			</params>
-		</extension>
-
 	</extensions>
 </plugin>
