@@ -31,6 +31,8 @@ class ScLdapLoginAuthenticator extends Extension_ScLoginAuthenticator {
 		
 		@$ldap_service_id = DevblocksPlatform::importGPC($params['ldap_service_id'], 'int', 0);
 		
+		// [TODO] Validation
+		// [TODO] Must be an LDAP service extension
 		
 		DAO_CommunityToolProperty::set($instance->code, 'sso.ldap.service_id', $ldap_service_id);
 		return true;
