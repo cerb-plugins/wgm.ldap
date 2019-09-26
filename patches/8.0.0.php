@@ -22,13 +22,13 @@ if(isset($ldap_settings['ldap_host']) && isset($ldap_settings['ldap_username']))
 	];
 	
 	$connected_account_id = DAO_ConnectedAccount::create([
-		DAO_ConnectedAccount::CREATED_AT => time(),
-		DAO_ConnectedAccount::EXTENSION_ID => 'wgm.ldap.service.provider',
-		DAO_ConnectedAccount::NAME => 'LDAP: ' . @$ldap_settings['ldap_host'],
-		DAO_ConnectedAccount::OWNER_CONTEXT => CerberusContexts::CONTEXT_APPLICATION,
-		DAO_ConnectedAccount::OWNER_CONTEXT_ID => 0,
-		DAO_ConnectedAccount::PARAMS_JSON => $encrypt->encrypt(json_encode($params)),
-		DAO_ConnectedAccount::UPDATED_AT => time(),
+		'created_at' => time(),
+		'extension_id' => 'wgm.ldap.service.provider',
+		'name' => 'LDAP: ' . @$ldap_settings['ldap_host'],
+		'owner_context' => CerberusContexts::CONTEXT_APPLICATION,
+		'owner_context_id' => 0,
+		'params_json' => $encrypt->encrypt(json_encode($params)),
+		'updated_at' => time(),
 	]);
 	
 	if($connected_account_id) {
